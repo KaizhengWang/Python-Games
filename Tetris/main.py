@@ -12,6 +12,18 @@ COLS = WIDTH // CELLSIZE
 clock = pygame.time.Clock()
 FPS = 24
 
+
+def load_highscore():
+	try:
+		with open("highscore.txt", "r") as f:
+			return int(f.read())
+	except:
+		return 0
+
+def save_highscore(score):
+	with open("highscore.txt", "w") as f:
+		f.write(str(score))
+
 # COLORS *********************************************************************
 
 BLACK = (21, 24, 29)
@@ -84,6 +96,7 @@ class Tetris:
 		self.next = None
 		self.gameover = False
 		self.new_figure()
+		self.highscore = load_highscore()
 
 	def draw_grid(self):
 		for i in range(self.rows+1):
@@ -135,6 +148,10 @@ class Tetris:
 		self.remove_line()
 		self.new_figure()
 		if self.intersects():
+			if self.score > self.highscore:
+				save_highscore(self.score)
+				self.highscore = self.score
+		#	pygame.mixer.Sound.play(gameover_sound)
 			self.gameover = True
 
 	def go_space(self):
@@ -263,8 +280,10 @@ while running:
 
 	scoreimg = font.render(f'{tetris.score}', True, WHITE)
 	levelimg = font2.render(f'Level : {tetris.level}', True, WHITE)
+	highimg = font2.render(f'High : {tetris.highscore}', True, WHITE)
 	win.blit(scoreimg, (250-scoreimg.get_width()//2, HEIGHT-110))
 	win.blit(levelimg, (250-levelimg.get_width()//2, HEIGHT-30))
+	win.blit(highimg, (250 - highimg.get_width() // 2, HEIGHT - 60))
 
 	pygame.draw.rect(win, BLUE, (0, 0, WIDTH, HEIGHT-120), 2)
 	clock.tick(FPS)
